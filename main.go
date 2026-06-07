@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/awmorgan/coresight"
-	"github.com/awmorgan/coresight/trace"
 )
 
 const snapshotDir = "../coresight/cmd/trc_pkt_lister/testdata/trace_cov_a15"
@@ -89,8 +88,8 @@ func run() error {
 		IDR:         0x411CF312,
 		Control:     0x20000400,
 		CCER:        0x34C01AC2,
-		ArchVersion: trace.ArchV7,
-		CoreProfile: trace.ProfileCortexA,
+		ArchVersion: coresight.ArchV7,
+		CoreProfile: coresight.ProfileCortexA,
 		PacketObserver: func(index uint64, pkt fmt.Stringer, rawData []byte) {
 			if len(rawData) == 0 {
 				return
@@ -104,7 +103,7 @@ func run() error {
 	}
 
 	// Register PTM for Trace ID 2
-	err = engine.RegisterPTM(2, ptmCfg, func(elem trace.Element) {
+	err = engine.RegisterPTM(2, ptmCfg, func(elem coresight.Element) {
 		outFile.WriteString(formatElement(elem))
 	})
 	if err != nil {
@@ -190,82 +189,82 @@ func formatPacket(index uint64, id uint8, pkt fmt.Stringer, rawData []byte) stri
 	return sb.String()
 }
 
-func unsyncName(info trace.UnsyncInfo) string {
+func unsyncName(info coresight.UnsyncInfo) string {
 	switch info {
-	case trace.UnsyncUnknown:
+	case coresight.UnsyncUnknown:
 		return "undefined"
-	case trace.UnsyncInitDecoder:
+	case coresight.UnsyncInitDecoder:
 		return "init-decoder"
-	case trace.UnsyncResetDecoder:
+	case coresight.UnsyncResetDecoder:
 		return "reset-decoder"
-	case trace.UnsyncOverflow:
+	case coresight.UnsyncOverflow:
 		return "overflow"
-	case trace.UnsyncDiscard:
+	case coresight.UnsyncDiscard:
 		return "discard"
-	case trace.UnsyncBadPacket:
+	case coresight.UnsyncBadPacket:
 		return "bad-packet"
-	case trace.UnsyncBadImage:
+	case coresight.UnsyncBadImage:
 		return "bad-program-image"
-	case trace.UnsyncEOT:
+	case coresight.UnsyncEOT:
 		return "end-of-trace"
 	default:
 		return "undefined"
 	}
 }
 
-func traceOnName(reason trace.TraceOnReason) string {
+func traceOnName(reason coresight.TraceOnReason) string {
 	switch reason {
-	case trace.TraceOnNormal:
+	case coresight.TraceOnNormal:
 		return "begin or filter"
-	case trace.TraceOnOverflow:
+	case coresight.TraceOnOverflow:
 		return "overflow"
-	case trace.TraceOnExDebug:
+	case coresight.TraceOnExDebug:
 		return "debug restart"
 	default:
 		return "begin or filter"
 	}
 }
 
-func isaName(isa trace.ISA) string {
+func isaName(isa coresight.ISA) string {
 	switch isa {
-	case trace.ISAArm:
+	case coresight.ISAArm:
 		return "A32"
-	case trace.ISAThumb2:
+	case coresight.ISAThumb2:
 		return "T32"
-	case trace.ISAAArch64:
+	case coresight.ISAAArch64:
 		return "A64"
-	case trace.ISATee:
+	case coresight.ISATee:
 		return "TEE"
-	case trace.ISAJazelle:
+	case coresight.ISAJazelle:
 		return "Jaz"
-	case trace.ISACustom:
+	case coresight.ISACustom:
 		return "Cst"
 	default:
 		return "Unk"
 	}
 }
 
-func securityLevelName(level trace.SecLevel) string {
+func securityLevelName(level coresight.SecLevel) string {
 	switch level {
-	case trace.SecSecure:
+	case coresight.SecSecure:
 		return "S; "
-	case trace.SecNonsecure:
+	case coresight.SecNonsecure:
 		return "N; "
-	case trace.SecRoot:
+	case coresight.SecRoot:
 		return "Root; "
-	case trace.SecRealm:
+	case coresight.SecRealm:
 		return "Realm; "
 	default:
 		return ""
 	}
 }
 
-func formatPEContext(e trace.Element) string {
+func formatPEContext(e coresight.Element) string {
 	var sb strings.Builder
 	sb.WriteString("(ISA=")
 	sb.WriteString(isaName(e.ISA))
 	sb.WriteString(") ")
-	if e.Context.ExceptionLevel > trace.ELUnknown && e.Context.ELValid {
+	if e.Context.ExceptionLevel > coresight.ELUnknown && e.Context.ELValid {
 		sb.WriteString("EL")
 		sb.WriteString(strconv.FormatUint(uint64(e.Context.ExceptionLevel), 10))
 	}
@@ -288,45 +287,45 @@ func formatPEContext(e trace.Element) string {
 	return sb.String()
 }
 
-func instrTypeName(t trace.InstrType) string {
+func instrTypeName(t coresight.InstrType) string {
 	switch t {
-	case trace.InstrOther:
+	case coresight.InstrOther:
 		return "--- "
-	case trace.InstrBr:
+	case coresight.InstrBr:
 		return "BR  "
-	case trace.InstrBrIndirect:
+	case coresight.InstrBrIndirect:
 		return "iBR "
-	case trace.InstrIsb:
+	case coresight.InstrIsb:
 		return "ISB "
-	case trace.InstrDsbDmb:
+	case coresight.InstrDsbDmb:
 		return "DSB.DMB"
-	case trace.InstrWfiWfe:
+	case coresight.InstrWfiWfe:
 		return "WFI.WFE"
-	case trace.InstrTstart:
+	case coresight.InstrTstart:
 		return "TSTART"
 	default:
 		return ""
 	}
 }
 
-func instrSubtypeName(s trace.InstrSubtype) string {
+func instrSubtypeName(s coresight.InstrSubtype) string {
 	switch s {
-	case trace.SInstrNone:
+	case coresight.SInstrNone:
 		return "--- "
-	case trace.SInstrBrLink:
+	case coresight.SInstrBrLink:
 		return "b+link "
-	case trace.SInstrV8Ret:
+	case coresight.SInstrV8Ret:
 		return "A64:ret "
-	case trace.SInstrV8Eret:
+	case coresight.SInstrV8Eret:
 		return "A64:eret "
-	case trace.SInstrV7ImpliedRet:
+	case coresight.SInstrV7ImpliedRet:
 		return "V7:impl ret"
 	default:
 		return ""
 	}
 }
 
-func formatInstrRange(e trace.Element) string {
+func formatInstrRange(e coresight.Element) string {
 	var sb strings.Builder
 	sb.WriteString("exec range=0x")
 	sb.WriteString(strconv.FormatUint(uint64(e.StartAddr), 16))
@@ -345,7 +344,7 @@ func formatInstrRange(e trace.Element) string {
 		sb.WriteString("N ")
 	}
 	sb.WriteString(instrTypeName(e.LastInstrType))
-	if e.LastInstrSubtype != trace.SInstrNone {
+	if e.LastInstrSubtype != coresight.SInstrNone {
 		sb.WriteString(instrSubtypeName(e.LastInstrSubtype))
 	}
 	if e.LastInstrCond {
@@ -354,7 +353,7 @@ func formatInstrRange(e trace.Element) string {
 	return sb.String()
 }
 
-func formatException(e trace.Element) string {
+func formatException(e coresight.Element) string {
 	var sb strings.Builder
 	if e.ExceptionRetAddr {
 		sb.WriteString("pref ret addr:0x")
@@ -373,7 +372,7 @@ func formatException(e trace.Element) string {
 	return sb.String()
 }
 
-func formatElement(e trace.Element) string {
+func formatElement(e coresight.Element) string {
 	var sb strings.Builder
 	sb.WriteString("Idx:")
 	sb.WriteString(strconv.FormatUint(uint64(e.Index), 10))
@@ -382,29 +381,29 @@ func formatElement(e trace.Element) string {
 	sb.WriteString("; ")
 
 	switch e.ElemType {
-	case trace.GenElemNoSync:
+	case coresight.GenElemNoSync:
 		sb.WriteString("OCSD_GEN_TRC_ELEM_NO_SYNC(")
 		sb.WriteString(" [")
 		sb.WriteString(unsyncName(e.Payload.UnsyncEOTInfo))
 		sb.WriteString("])")
-	case trace.GenElemTraceOn:
+	case coresight.GenElemTraceOn:
 		sb.WriteString("OCSD_GEN_TRC_ELEM_TRACE_ON(")
 		sb.WriteString(" [")
 		sb.WriteString(traceOnName(e.Payload.TraceOnReason))
 		sb.WriteString("])")
-	case trace.GenElemPeContext:
+	case coresight.GenElemPeContext:
 		sb.WriteString("OCSD_GEN_TRC_ELEM_PE_CONTEXT(")
 		sb.WriteString(formatPEContext(e))
 		sb.WriteString(")")
-	case trace.GenElemInstrRange:
+	case coresight.GenElemInstrRange:
 		sb.WriteString("OCSD_GEN_TRC_ELEM_INSTR_RANGE(")
 		sb.WriteString(formatInstrRange(e))
 		sb.WriteString(")")
-	case trace.GenElemException:
+	case coresight.GenElemException:
 		sb.WriteString("OCSD_GEN_TRC_ELEM_EXCEPTION(")
 		sb.WriteString(formatException(e))
 		sb.WriteString(")")
-	case trace.GenElemEOTrace:
+	case coresight.GenElemEOTrace:
 		sb.WriteString("OCSD_GEN_TRC_ELEM_EO_TRACE(")
 		sb.WriteString(" [")
 		sb.WriteString(unsyncName(e.Payload.UnsyncEOTInfo))
